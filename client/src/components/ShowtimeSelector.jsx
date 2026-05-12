@@ -4,10 +4,10 @@ import { fetchMovies } from "../api/movies.js";
 
 const today = () => new Date().toISOString().slice(0, 10);
 
-export default function ShowtimeSelector() {
+export default function ShowtimeSelector({ onBook, initialMovieId = "" }) {
   const [movies, setMovies] = useState([]);
   const [showtimes, setShowtimes] = useState([]);
-  const [filters, setFilters] = useState({ movieId: "", date: today() });
+  const [filters, setFilters] = useState({ movieId: initialMovieId, date: today() });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -119,13 +119,6 @@ export default function ShowtimeSelector() {
                       </div>
                     )}
 
-                    {/* Seat availability bar */}
-                    <div className="seat-bar-wrap">
-                      <div
-                        className={`seat-bar ${pct < 20 ? "seat-bar--critical" : pct < 50 ? "seat-bar--low" : "seat-bar--ok"}`}
-                        style={{ width: `${pct}%` }}
-                      />
-                    </div>
                     <div className="slot-bottom">
                       <span className={`seat-count ${soldOut ? "sold-out" : ""}`}>
                         {soldOut ? "Sold Out" : `${s.availableSeats} seats left`}
@@ -136,7 +129,7 @@ export default function ShowtimeSelector() {
                     <button
                       className="book-btn"
                       disabled={soldOut}
-                      onClick={() => alert(`Booking for showtime ${s._id} — wire up to booking flow.`)}
+                      onClick={() => onBook(s)}
                     >
                       {soldOut ? "Sold Out" : "Book Now"}
                     </button>

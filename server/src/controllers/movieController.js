@@ -30,9 +30,13 @@ const normalizePayload = (payload) => {
 
 export const createMovie = async (req, res, next) => {
   try {
-    const posterUrl = req.file ? buildPosterUrl(req, req.file.filename) : "";
+    const payload = normalizePayload(req.body);
+    const posterUrl = req.file 
+      ? buildPosterUrl(req, req.file.filename) 
+      : (payload.posterUrl || "");
+
     const movie = await Movie.create({
-      ...normalizePayload(req.body),
+      ...payload,
       posterUrl
     });
     res.status(201).json(movie);
@@ -91,8 +95,12 @@ export const updateMovie = async (req, res, next) => {
   try {
     const { id } = req.params;
     const payload = normalizePayload(req.body);
+    
     if (req.file) {
       payload.posterUrl = buildPosterUrl(req, req.file.filename);
+    } else if (payload.posterUrl === undefined) {
+      // If posterUrl not in body and no file, don't change it
+      delete payload.posterUrl;
     }
 
     const movie = await Movie.findByIdAndUpdate(id, payload, {

@@ -118,17 +118,17 @@ export default function AdminShowtimeManager({
 
   return (
     <section className="admin">
-      <h2>Showtime Manager</h2>
-
-      {error && <p className="error-banner">{error}</p>}
-      {success && <p className="success-banner">{success}</p>}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem" }}>
+        <h2>Screen Scheduling</h2>
+        <p className="field-label">Manage showtimes and hall assignments</p>
+      </div>
 
       <div className="admin-grid">
         {/* ── Schedule Showtime ─────────────────────────────── */}
-        <div>
+        <div style={{ background: "#222", padding: "1.5rem", borderRadius: "8px" }}>
           <h3>Schedule New Showtime</h3>
           <form className="form" onSubmit={handleCreate}>
-            <label className="field-label">Movie</label>
+            <label className="field-label">Target Movie</label>
             <select
               value={form.movieId}
               onChange={(e) => setForm((p) => ({ ...p, movieId: e.target.value }))}
@@ -142,7 +142,7 @@ export default function AdminShowtimeManager({
               ))}
             </select>
 
-            <label className="field-label">Hall</label>
+            <label className="field-label">Assign to Hall</label>
             <select
               value={form.hallId}
               onChange={(e) => setForm((p) => ({ ...p, hallId: e.target.value }))}
@@ -157,7 +157,7 @@ export default function AdminShowtimeManager({
             </select>
 
             <label className="field-label">
-              Start Time <span className="tz-note">(local time → stored as UTC)</span>
+              Start Time <span className="tz-note">(UTC-aware)</span>
             </label>
             <input
               type="datetime-local"
@@ -178,118 +178,127 @@ export default function AdminShowtimeManager({
               required
             />
 
-            <button type="submit">Schedule Showtime</button>
+            <button type="submit" style={{ width: "100%", marginTop: "1rem" }}>Finalize Schedule</button>
           </form>
         </div>
 
         {/* ── Reschedule Showtime ───────────────────────────── */}
-        <div>
-          <h3>Reschedule / Cancel</h3>
-          <select value={editId} onChange={(e) => selectShowtime(e.target.value)}>
-            <option value="">Select showtime…</option>
-            {showtimes.map((s) => (
+        <div style={{ background: "#222", padding: "1.5rem", borderRadius: "8px" }}>
+          <h3>Reschedule / Adjust</h3>
+          <select 
+            value={editId} 
+            onChange={(e) => selectShowtime(e.target.value)}
+            style={{ marginBottom: "1rem" }}
+          >
+            <option value="">Select active session…</option>
+            {showtimes.filter(s => s.isActive).map((s) => (
               <option key={s._id} value={s._id}>
-                {s.movie?.title || "?"} @ {s.hall?.name || "?"} — {formatDt(s.startTime)}{" "}
-                {s.isActive ? "" : "(Cancelled)"}
+                {s.movie?.title} @ {s.hall?.name} — {formatDt(s.startTime)}
               </option>
             ))}
           </select>
 
           {selectedShowtime ? (
-            <>
-              <form className="form" onSubmit={handleUpdate} style={{ marginTop: "0.75rem" }}>
-                <label className="field-label">New Start Time</label>
-                <input
-                  type="datetime-local"
-                  value={editForm.startTime}
-                  onChange={(e) => setEditForm((p) => ({ ...p, startTime: e.target.value }))}
-                />
+            <form className="form" onSubmit={handleUpdate}>
+              <label className="field-label">New Slot Start</label>
+              <input
+                type="datetime-local"
+                value={editForm.startTime}
+                onChange={(e) => setEditForm((p) => ({ ...p, startTime: e.target.value }))}
+              />
 
-                <label className="field-label">Move to Hall</label>
-                <select
-                  value={editForm.hallId}
-                  onChange={(e) => setEditForm((p) => ({ ...p, hallId: e.target.value }))}
-                >
-                  <option value="">Keep current hall</option>
-                  {halls.filter((h) => h.isActive).map((h) => (
-                    <option key={h._id} value={h._id}>
-                      {h.name} — {h.totalCapacity} seats
-                    </option>
-                  ))}
-                </select>
+              <label className="field-label">Relocate to Hall</label>
+              <select
+                value={editForm.hallId}
+                onChange={(e) => setEditForm((p) => ({ ...p, hallId: e.target.value }))}
+              >
+                <option value="">Keep current hall</option>
+                {halls.filter((h) => h.isActive).map((h) => (
+                  <option key={h._id} value={h._id}>
+                    {h.name} — {h.totalCapacity} seats
+                  </option>
+                ))}
+              </select>
 
-                <label className="field-label">Ticket Price ($)</label>
-                <input
-                  type="number"
-                  min={0}
-                  step={0.01}
-                  value={editForm.ticketPrice}
-                  onChange={(e) => setEditForm((p) => ({ ...p, ticketPrice: e.target.value }))}
-                />
+              <label className="field-label">Update Price ($)</label>
+              <input
+                type="number"
+                min={0}
+                step={0.01}
+                value={editForm.ticketPrice}
+                onChange={(e) => setEditForm((p) => ({ ...p, ticketPrice: e.target.value }))}
+              />
 
-                <button type="submit" disabled={!selectedShowtime.isActive}>
-                  Save Changes
-                </button>
-              </form>
-
-              <div className="admin-actions">
-                <button
-                  className="danger"
-                  onClick={handleCancel}
-                  disabled={!selectedShowtime.isActive}
-                >
-                  Cancel Showtime
-                </button>
-              </div>
-            </>
+              <button type="submit" style={{ width: "100%", marginTop: "1rem" }}>Update Slot</button>
+              <button 
+                type="button" 
+                className="danger" 
+                onClick={handleCancel}
+                style={{ width: "100%", marginTop: "0.5rem" }}
+              >
+                Cancel Session
+              </button>
+            </form>
           ) : (
-            <p className="info">Select a showtime to reschedule or cancel it.</p>
+            <div style={{ textAlign: "center", padding: "3rem", color: "#666", border: "1px dashed #444", borderRadius: "4px" }}>
+              Select a showtime to reschedule or relocate it to a different screen.
+            </div>
           )}
         </div>
       </div>
 
-      {/* ── Scheduled Showtime List ───────────────────────── */}
-      <h3 style={{ marginTop: "1.5rem" }}>All Showtimes ({showtimes.length})</h3>
-      {showtimes.length === 0 ? (
-        <p className="info">No showtimes scheduled yet.</p>
-      ) : (
-        <div className="showtime-table-wrapper">
-          <table className="showtime-table">
-            <thead>
-              <tr>
-                <th>Movie</th>
-                <th>Hall</th>
-                <th>Start</th>
-                <th>End</th>
-                <th>Seats</th>
-                <th>Price</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {showtimes.map((s) => (
-                <tr key={s._id} className={!s.isActive ? "row-cancelled" : ""}>
-                  <td>{s.movie?.title || "—"}</td>
-                  <td>{s.hall?.name || "—"}</td>
-                  <td>{formatDt(s.startTime)}</td>
-                  <td>{formatDt(s.endTime)}</td>
-                  <td>
-                    <span className={`seat-badge ${s.availableSeats === 0 ? "sold-out" : ""}`}>
+      <h3 style={{ marginTop: "3rem", borderBottom: "1px solid #333", paddingBottom: "0.5rem" }}>
+        Scheduling Grid ({showtimes.length})
+      </h3>
+      <div className="showtime-table-wrapper" style={{ marginTop: "1rem" }}>
+        <table className="showtime-table">
+          <thead>
+            <tr>
+              <th>Movie</th>
+              <th>Hall</th>
+              <th>Start</th>
+              <th>Seats Available</th>
+              <th>Price</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {showtimes.map((s) => (
+              <tr key={s._id} className={!s.isActive ? "row-cancelled" : ""}>
+                <td style={{ fontWeight: "bold" }}>{s.movie?.title || "—"}</td>
+                <td>{s.hall?.name || "—"}</td>
+                <td style={{ color: "var(--netflix-light-gray)" }}>{formatDt(s.startTime)}</td>
+                <td>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                    <div style={{ 
+                      flex: 1, 
+                      height: "4px", 
+                      background: "#333", 
+                      borderRadius: "2px",
+                      overflow: "hidden" 
+                    }}>
+                      <div style={{ 
+                        width: `${(s.availableSeats / (s.hall?.totalCapacity || 1)) * 100}%`,
+                        height: "100%",
+                        background: s.availableSeats === 0 ? "var(--netflix-red)" : "#1db954"
+                      }} />
+                    </div>
+                    <span style={{ fontSize: "0.75rem", minWidth: "50px" }}>
                       {s.availableSeats} / {s.hall?.totalCapacity ?? "?"}
                     </span>
-                  </td>
-                  <td>${s.ticketPrice?.toFixed(2)}</td>
-                  <td>
-                    <span className={`status-badge ${s.isActive ? "status-active" : "status-inactive"}`}>
-                      {s.isActive ? "Active" : "Cancelled"}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+                  </div>
+                </td>
+                <td>${s.ticketPrice?.toFixed(2)}</td>
+                <td>
+                  <span className={`status-badge ${s.isActive ? "status-active" : "status-inactive"}`} style={{ fontSize: "0.6rem" }}>
+                    {s.isActive ? "Confirmed" : "Cancelled"}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </section>
   );
 }
