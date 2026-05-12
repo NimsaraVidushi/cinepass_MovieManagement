@@ -2,6 +2,8 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import movieRoutes from "./routes/movieRoutes.js";
+import hallRoutes from "./routes/hallRoutes.js";
+import showtimeRoutes from "./routes/showtimeRoutes.js";
 import { connectDb } from "./config/db.js";
 
 const app = express();
@@ -16,6 +18,8 @@ app.get("/health", (_req, res) => {
 });
 
 app.use("/api/movies", movieRoutes);
+app.use("/api/halls", hallRoutes);
+app.use("/api/showtimes", showtimeRoutes);
 
 app.use((error, _req, res, _next) => {
   // eslint-disable-next-line no-console
