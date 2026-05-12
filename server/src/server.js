@@ -4,6 +4,7 @@ import cors from "cors";
 import movieRoutes from "./routes/movieRoutes.js";
 import hallRoutes from "./routes/hallRoutes.js";
 import showtimeRoutes from "./routes/showtimeRoutes.js";
+import bookingRoutes from "./routes/bookingRoutes.js";
 import { connectDb } from "./config/db.js";
 
 const app = express();
@@ -20,6 +21,7 @@ app.get("/health", (_req, res) => {
 app.use("/api/movies", movieRoutes);
 app.use("/api/halls", hallRoutes);
 app.use("/api/showtimes", showtimeRoutes);
+app.use("/api/bookings", bookingRoutes);
 
 app.use((error, _req, res, _next) => {
   // eslint-disable-next-line no-console
