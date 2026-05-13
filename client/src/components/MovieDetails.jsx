@@ -4,14 +4,13 @@ export default function MovieDetails({ movie, onClose, onBook }) {
   return (
     <section className="details animate-in" style={{ 
       position: "relative", 
-      background: "var(--netflix-dark-gray)",
+      background: "var(--netflix-black)",
       padding: "0",
       overflow: "hidden",
-      borderRadius: "16px",
-      boxShadow: "var(--shadow-lg)"
+      minHeight: "100vh"
     }}>
       <div style={{ 
-        height: "500px", 
+        height: "70vh", 
         width: "100%", 
         position: "relative",
         overflow: "hidden"
@@ -57,13 +56,14 @@ export default function MovieDetails({ movie, onClose, onBook }) {
       </div>
 
       <div style={{ 
-        padding: "0 6% 4rem",
-        marginTop: "-200px",
+        padding: "0 6% 8rem",
+        marginTop: "-30vh",
         position: "relative",
         zIndex: 2,
         display: "grid",
-        gridTemplateColumns: "300px 1fr",
-        gap: "4rem"
+        gridTemplateColumns: "minmax(300px, 1fr) 2fr",
+        gap: "5vw",
+        alignItems: "end"
       }}>
         <div className="fade-in">
           <img 
@@ -74,7 +74,9 @@ export default function MovieDetails({ movie, onClose, onBook }) {
               borderRadius: "12px",
               boxShadow: "0 30px 60px rgba(0,0,0,0.9)",
               border: "1px solid rgba(255,255,255,0.1)",
-              width: "100%"
+              width: "100%",
+              aspectRatio: "2/3",
+              objectFit: "cover"
             }}
           />
         </div>
@@ -91,7 +93,6 @@ export default function MovieDetails({ movie, onClose, onBook }) {
           <div style={{ display: "flex", alignItems: "center", gap: "2rem", marginBottom: "2rem" }}>
             <span style={{ color: "#46d369", fontWeight: "800", fontSize: "1.1rem" }}>98% Match</span>
             <span style={{ color: "var(--netflix-light-gray)", fontSize: "1.1rem" }}>{new Date(movie.releaseDate).getFullYear()}</span>
-            <span className="rating" style={{ border: "1px solid #666", padding: "2px 8px", borderRadius: "4px", fontSize: "0.9rem" }}>{movie.ageRating}</span>
             <span style={{ color: "var(--netflix-light-gray)", fontSize: "1.1rem" }}>{movie.duration}m</span>
             <span className="glass" style={{ padding: "2px 8px", borderRadius: "4px", fontSize: "0.8rem", fontWeight: "800" }}>4K ULTRA HD</span>
           </div>

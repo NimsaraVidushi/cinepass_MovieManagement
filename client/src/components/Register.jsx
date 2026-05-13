@@ -31,78 +31,86 @@ export default function Register({ onRegisterSuccess, onSwitchToLogin }) {
   };
 
   return (
-    <div className="auth-form-container">
-      <form className="auth-form" onSubmit={handleSubmit}>
-        <h2>Register</h2>
-        {error && <div className="error-message">{error}</div>}
-        <div className="form-group">
-          <label htmlFor="username">Username</label>
-          <input
-            type="text"
-            id="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-            placeholder="Enter your username"
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="email">Email</label>
-          <input
-            type="email"
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            placeholder="Enter your email"
-          />
-        </div>
-        <div className="form-group">
-          <label htmlFor="password">Password</label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            placeholder="Choose a password"
-          />
-        </div>
+    <div className="auth-page-wrapper">
+      <div className="auth-background">
+        <img 
+          src="https://assets.nflxext.com/ffe/siteui/vlv3/f841d4c7-10e1-40af-bca1-07583708f1a5/1229342e-131b-4861-9f93-013063b464a8/US-en-20220502-popsignuptwoweeks-perspective_alpha_website_medium.jpg" 
+          alt="Netflix background" 
+        />
+      </div>
 
-        <div className="form-group checkbox-group">
-          <label>
-            <input 
-              type="checkbox" 
-              checked={isAdmin} 
-              onChange={(e) => setIsAdmin(e.target.checked)} 
-            />
-            Register as Administrator
-          </label>
-        </div>
-
-        {isAdmin && (
-          <div className="form-group">
-            <label htmlFor="adminSecret">Admin Secret Key</label>
+      <div className="auth-card">
+        <h1 style={{ color: "#fff", fontSize: "32px", fontWeight: "700", marginBottom: "28px" }}>Register</h1>
+        
+        {error && <div className="auth-error">{error}</div>}
+        
+        <form onSubmit={handleSubmit}>
+          <div className="auth-form-group">
             <input
-              type="password"
-              id="adminSecret"
-              value={adminSecret}
-              onChange={(e) => setAdminSecret(e.target.value)}
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
-              placeholder="Enter secret key"
+              placeholder="Username"
+              autoFocus
             />
           </div>
-        )}
-        <button type="submit" className="primary" disabled={loading}>
-          {loading ? "Registering..." : "Register"}
-        </button>
-        <p>
-          Already have an account?{" "}
-          <button type="button" className="link-button" onClick={onSwitchToLogin}>
-            Login here
+
+          <div className="auth-form-group">
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              placeholder="Email address"
+            />
+          </div>
+          
+          <div className="auth-form-group">
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              placeholder="Password"
+            />
+          </div>
+
+          <div className="auth-form-group checkbox-group" style={{ display: "flex", alignItems: "center", gap: "0.8rem", margin: "1rem 0" }}>
+            <input 
+              type="checkbox" 
+              id="is-admin"
+              checked={isAdmin} 
+              onChange={(e) => setIsAdmin(e.target.checked)} 
+              style={{ width: "auto" }}
+            />
+            <label htmlFor="is-admin" style={{ margin: 0, cursor: "pointer" }}>Register as Administrator</label>
+          </div>
+
+          {isAdmin && (
+            <div className="auth-form-group animate-in">
+              <input
+                type="password"
+                value={adminSecret}
+                onChange={(e) => setAdminSecret(e.target.value)}
+                required
+                placeholder="Admin Secret Key"
+              />
+            </div>
+          )}
+          
+          <button type="submit" className="auth-submit-btn" disabled={loading}>
+            {loading ? "Registering..." : "Create Account"}
           </button>
-        </p>
-      </form>
+        </form>
+
+        <div className="auth-footer">
+          <span>Already have an account?</span>
+          <button type="button" onClick={onSwitchToLogin}>
+            Sign in now.
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

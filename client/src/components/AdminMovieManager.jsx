@@ -42,12 +42,12 @@ export default function AdminMovieManager({
                 <input name="language" placeholder="English" required />
               </div>
               <div className="form-group">
-                <label className="field-label">Age Rating</label>
-                <input name="ageRating" placeholder="PG-13" required />
-              </div>
-              <div className="form-group">
                 <label className="field-label">Duration (min)</label>
                 <input name="duration" type="number" placeholder="148" required />
+              </div>
+              <div className="form-group">
+                <label className="field-label">Age Rating</label>
+                <input name="ageRating" placeholder="PG-13, R, etc." required />
               </div>
               <div className="form-group">
                 <label className="field-label">Release Date</label>
@@ -83,7 +83,13 @@ export default function AdminMovieManager({
             <img 
               src={movie.posterUrl || "https://via.placeholder.com/150x225?text=No+Poster"} 
               alt={movie.title} 
-              style={{ width: "100px", height: "150px", objectFit: "cover", borderRadius: "8px", boxShadow: "0 10px 20px rgba(0,0,0,0.5)" }}
+              style={{ 
+                width: "100px", 
+                aspectRatio: "2/3", 
+                objectFit: "cover", 
+                borderRadius: "8px", 
+                boxShadow: "0 10px 20px rgba(0,0,0,0.5)" 
+              }}
             />
             <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
               <div>

@@ -3,7 +3,14 @@ import AdminMovieManager from "./components/AdminMovieManager.jsx";
 import AdminMovieEdit from "./components/AdminMovieEdit.jsx";
 import AdminHallManager from "./components/AdminHallManager.jsx";
 import AdminShowtimeManager from "./components/AdminShowtimeManager.jsx";
+import AdminPromotionManager from "./components/AdminPromotionManager.jsx";
 import ShowtimeSelector from "./components/ShowtimeSelector.jsx";
+import { 
+  fetchPromotions, 
+  fetchActivePromotions,
+  createPromotion as apiCreatePromo, 
+  deletePromotion as apiDeletePromo 
+} from "./api/promotions.js";
 import MovieDetails from "./components/MovieDetails.jsx";
 import MovieList from "./components/MovieList.jsx";
 import BookingPage from "./components/BookingPage.jsx";
@@ -19,6 +26,7 @@ import {
   activateMovie,
   createMovie,
   deactivateMovie,
+  deleteMovie,
   fetchMovieById,
   fetchMovies,
   updateMovie
@@ -51,7 +59,6 @@ export default function App() {
   const [filters, setFilters] = useState({
     genre: "",
     language: "",
-    ageRating: "",
     sort: "releaseDate:desc"
   });
 
@@ -74,6 +81,8 @@ export default function App() {
   const [adminSection, setAdminSection] = useState("movies");
   const [editingMovie, setEditingMovie] = useState(null);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [promotions, setPromotions] = useState([]);
+  const [activePromotions, setActivePromotions] = useState([]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -127,6 +136,12 @@ export default function App() {
     loadMovies(activeTab === "admin");
   }, [filters, activeTab]);
 
+  useEffect(() => {
+    fetchActivePromotions()
+      .then(setActivePromotions)
+      .catch(() => {});
+  }, []);
+
   const loadHalls = async () => {
     const result = await fetchHalls({ includeInactive: "true" });
     setHalls(result);
@@ -141,15 +156,20 @@ export default function App() {
     setShowtimes(result);
   };
 
+  const loadPromotions = async () => {
+    const result = await fetchPromotions(user?.token);
+    setPromotions(result);
+  };
+
   useEffect(() => {
-    if (activeTab === "admin" && adminSection === "showtimes") {
-      loadAdminShowtimes();
+    if (activeTab === "admin") {
+      if (adminSection === "showtimes") loadAdminShowtimes();
+      if (adminSection === "promotions") loadPromotions();
     }
   }, [activeTab, adminSection]);
 
   const genres = useMemo(() => [...new Set(movies.map((m) => m.genre))], [movies]);
   const languages = useMemo(() => [...new Set(movies.map((m) => m.language))], [movies]);
-  const ratings = useMemo(() => [...new Set(movies.map((m) => m.ageRating))], [movies]);
 
   const handleSelectMovie = async (id) => {
     const movie = await fetchMovieById(id, activeTab === "admin");
@@ -159,6 +179,15 @@ export default function App() {
   const handleUpdate = async (id, formData) => { await updateMovie(id, formData, user?.token); await loadMovies(true); };
   const handleDeactivate = async (id) => { await deactivateMovie(id, user?.token); await loadMovies(true); if (editingMovie?._id === id) setEditingMovie(prev => ({...prev, isActive: false})); };
   const handleActivate = async (id) => { await activateMovie(id, user?.token); await loadMovies(true); if (editingMovie?._id === id) setEditingMovie(prev => ({...prev, isActive: true})); };
+  const handleDeleteMovie = async (id) => { 
+    try {
+      await deleteMovie(id, user?.token); 
+      await loadMovies(true);
+      setEditingMovie(null);
+    } catch (err) {
+      setErrorMessage(err.message);
+    }
+  };
 
   const handleCreateHall = async (data) => { await createHall(data, user?.token); await loadHalls(); };
   const handleUpdateHall = async (id, data) => { await updateHall(id, data, user?.token); await loadHalls(); };
@@ -167,6 +196,9 @@ export default function App() {
   const handleCreateShowtime = async (data) => { await createShowtime(data, user?.token); await loadAdminShowtimes(); };
   const handleUpdateShowtime = async (id, data) => { await updateShowtime(id, data, user?.token); await loadAdminShowtimes(); };
   const handleCancelShowtime = async (id) => { await cancelShowtime(id, user?.token); await loadAdminShowtimes(); };
+
+  const handleCreatePromo = async (data) => { await apiCreatePromo(data, user?.token); await loadPromotions(); };
+  const handleDeletePromo = async (id) => { await apiDeletePromo(id, user?.token); await loadPromotions(); };
 
   // ── Booking flow handlers ───────────────────────────────────────────────────
   const startBooking = (showtime) => {
@@ -231,62 +263,43 @@ export default function App() {
   return (
     <main className="container">
       <header className={isScrolled ? "scrolled" : ""}>
-        <h1 className="logo" onClick={() => switchTab("catalog")}>Cinepass</h1>
-        <nav className="tabs">
-          <button
-            id="tab-catalog"
-            className={activeTab === "catalog" ? "active-link" : "nav-link"}
-            onClick={() => switchTab("catalog")}
-            style={{ background: "none", boxShadow: "none", padding: "0.5rem" }}
-          >
-            Home
-          </button>
-          <button
-            id="tab-showtimes"
-            className={activeTab === "showtimes" ? "active-link" : "nav-link"}
-            onClick={() => switchTab("showtimes")}
-            style={{ background: "none", boxShadow: "none", padding: "0.5rem" }}
-          >
-            Showtimes
-          </button>
-          {user && (
-            <button
-              id="tab-bookings"
-              className={activeTab === "bookings" ? "active-link" : "nav-link"}
-              onClick={() => switchTab("bookings")}
-              style={{ background: "none", boxShadow: "none", padding: "0.5rem" }}
-            >
-              My List
-            </button>
-          )}
-          {user && user.role === "admin" && (
-            <button
-              id="tab-admin"
-              className={activeTab === "admin" ? "active-link" : "nav-link"}
-              onClick={() => switchTab("admin")}
-              style={{ background: "none", boxShadow: "none", padding: "0.5rem" }}
-            >
-              Admin
-            </button>
-          )}
-        </nav>
+        <div className="header-left">
+          <h1 className="logo" onClick={() => switchTab("catalog")}>CINEPASS</h1>
+          <nav className="tabs" style={{ marginLeft: "3rem" }}>
+            <span className={activeTab === "catalog" ? "nav-link active" : "nav-link"} onClick={() => switchTab("catalog")}>Home</span>
+            <span className={activeTab === "showtimes" ? "nav-link active" : "nav-link"} onClick={() => switchTab("showtimes")}>Showtimes</span>
+            {user && <span className={activeTab === "bookings" ? "nav-link active" : "nav-link"} onClick={() => switchTab("bookings")}>My List</span>}
+            {user?.role === "admin" && <span className={activeTab === "admin" ? "nav-link active" : "nav-link"} onClick={() => switchTab("admin")}>Admin</span>}
+          </nav>
+        </div>
 
-        <div className="user-nav">
+        <div className="header-right">
           {user ? (
-            <div className="user-info">
-              <span className="user-name">{user.username}</span>
-              <button className="logout-btn" onClick={handleLogout}>Logout</button>
+            <div className="user-nav">
+              <div className="profile-container" style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+                <span className="user-name" style={{ fontSize: "0.9rem", fontWeight: "600" }}>{user.username}</span>
+                <img 
+                  src={`https://api.dicebear.com/7.x/initials/svg?seed=${user.username}&backgroundColor=e50914`} 
+                  alt="Avatar" 
+                  style={{ width: "32px", height: "32px", borderRadius: "4px" }}
+                />
+                <button 
+                  className="secondary glass" 
+                  onClick={handleLogout}
+                  style={{ padding: "0.4rem 0.8rem", fontSize: "0.8rem" }}
+                >
+                  Sign Out
+                </button>
+              </div>
             </div>
           ) : (
-            <div className="tabs">
-              <button 
-                className="secondary" 
-                onClick={() => setActiveTab("login")}
-                style={{ padding: "0.5rem 1rem" }}
-              >
-                Login
-              </button>
-            </div>
+            <button 
+              className="primary" 
+              onClick={() => setActiveTab("login")}
+              style={{ padding: "7px 17px", fontSize: "0.9rem", borderRadius: "3px" }}
+            >
+              Sign In
+            </button>
           )}
         </div>
       </header>
@@ -306,30 +319,94 @@ export default function App() {
             />
           )}
 
-          <div className="filters-container">
-            <section className="filters">
-              <select value={filters.genre} onChange={(e) => setFilters((p) => ({ ...p, genre: e.target.value }))}>
-                <option value="">Genres</option>
-                {genres.map((g) => <option key={g} value={g}>{g}</option>)}
-              </select>
-              <select value={filters.language} onChange={(e) => setFilters((p) => ({ ...p, language: e.target.value }))}>
-                <option value="">Languages</option>
-                {languages.map((l) => <option key={l} value={l}>{l}</option>)}
-              </select>
-              <select value={filters.sort} onChange={(e) => setFilters((p) => ({ ...p, sort: e.target.value }))}>
-                <option value="releaseDate:desc">Newest</option>
-                <option value="releaseDate:asc">Oldest</option>
-                <option value="title:asc">A–Z</option>
-              </select>
-            </section>
-          </div>
+          {!selectedMovie && (
+            <div className="filters-container">
+              <section className="filters">
+                <select value={filters.genre} onChange={(e) => setFilters((p) => ({ ...p, genre: e.target.value }))}>
+                  <option value="">Genres</option>
+                  {genres.map((g) => <option key={g} value={g}>{g}</option>)}
+                </select>
+                <select value={filters.language} onChange={(e) => setFilters((p) => ({ ...p, language: e.target.value }))}>
+                  <option value="">Languages</option>
+                  {languages.map((l) => <option key={l} value={l}>{l}</option>)}
+                </select>
+                <select value={filters.sort} onChange={(e) => setFilters((p) => ({ ...p, sort: e.target.value }))}>
+                  <option value="releaseDate:desc">Newest</option>
+                  <option value="releaseDate:asc">Oldest</option>
+                  <option value="title:asc">A–Z</option>
+                </select>
+              </section>
+            </div>
+          )}
 
           <div className="inner-container animate-in" style={{ marginTop: "2rem" }}>
-            <h2 className="section-title">Now Showing</h2>
-            {selectedMovie
-              ? <MovieDetails movie={selectedMovie} onClose={() => setSelectedMovie(null)} onBook={handleBookFromDetails} />
-              : <MovieList movies={movies} onSelectMovie={handleSelectMovie} loading={loading} />
-            }
+            {selectedMovie ? (
+              <MovieDetails 
+                movie={selectedMovie} 
+                onClose={() => setSelectedMovie(null)} 
+                onBook={handleBookFromDetails} 
+              />
+            ) : (
+              <>
+                {filters.genre || filters.language ? (
+                  <MovieList 
+                    movies={movies} 
+                    onSelectMovie={handleSelectMovie} 
+                    loading={loading} 
+                    title="Search Results"
+                  />
+                ) : (
+                  <div style={{ paddingBottom: "5rem" }}>
+                    <MovieList 
+                      movies={movies.slice(0, 6)} 
+                      variant="row" 
+                      title="Trending Now" 
+                      onSelectMovie={handleSelectMovie} 
+                      loading={loading} 
+                    />
+
+                    {activePromotions.length > 0 && (
+                      <div className="promo-row-container" style={{ margin: "4rem 0" }}>
+                        <h2 className="section-title" style={{ marginBottom: "1.5rem", fontSize: "1.4rem" }}>Exclusive Offers</h2>
+                        <div className="promo-scroll" style={{ display: "flex", gap: "1.5rem", overflowX: "auto", paddingBottom: "1rem" }}>
+                          {activePromotions.map(promo => (
+                            <div key={promo._id} className="glass animate-in" style={{ 
+                              minWidth: "300px", 
+                              padding: "1.5rem", 
+                              borderRadius: "12px", 
+                              border: "1px solid var(--netflix-red)",
+                              background: "linear-gradient(135deg, rgba(229, 9, 20, 0.1) 0%, rgba(0,0,0,0.4) 100%)",
+                              display: "flex",
+                              flexDirection: "column",
+                              justifyContent: "center"
+                            }}>
+                              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                <span style={{ fontSize: "1.5rem", fontWeight: "900", color: "#fff" }}>{promo.code}</span>
+                                <span style={{ background: "var(--netflix-red)", color: "#fff", padding: "0.2rem 0.6rem", borderRadius: "4px", fontSize: "0.8rem", fontWeight: "800" }}>
+                                  {promo.discountPct}% OFF
+                                </span>
+                              </div>
+                              <p style={{ color: "#ccc", fontSize: "0.85rem", marginTop: "0.8rem", margin: "0.8rem 0 0" }}>{promo.description}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {genres.map((genre) => (
+                      <MovieList 
+                        key={genre}
+                        movies={movies.filter(m => m.genre === genre)} 
+                        variant="row" 
+                        title={genre} 
+                        onSelectMovie={handleSelectMovie} 
+                        loading={loading} 
+                      />
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
           </div>
         </div>
       )}
@@ -347,7 +424,14 @@ export default function App() {
       {/* ── Booking History Tab ───────────────────────────────────────────── */}
       {activeTab === "bookings" && (
         <div className="inner-container">
-          {user ? <BookingHistory user={user} /> : setActiveTab("login")}
+          {user ? (
+            <BookingHistory user={user} />
+          ) : (
+            <div style={{ textAlign: "center", padding: "5rem" }}>
+              <h2 style={{ marginBottom: "2rem" }}>Please login to view your history</h2>
+              <button onClick={() => setActiveTab("login")}>Login Now</button>
+            </div>
+          )}
         </div>
       )}
 
@@ -437,6 +521,13 @@ export default function App() {
               >
                 Showtimes
               </button>
+              <button
+                id="admin-tab-promotions"
+                className={adminSection === "promotions" ? "active" : "secondary"}
+                onClick={() => setAdminSection("promotions")}
+              >
+                Promotions
+              </button>
             </div>
 
             {adminSection === "movies" && !editingMovie && (
@@ -454,6 +545,7 @@ export default function App() {
                 onCancel={() => setEditingMovie(null)}
                 onDeactivate={handleDeactivate}
                 onActivate={handleActivate}
+                onDelete={handleDeleteMovie}
               />
             )}
 
@@ -474,6 +566,14 @@ export default function App() {
                 onCreate={handleCreateShowtime}
                 onUpdate={handleUpdateShowtime}
                 onCancel={handleCancelShowtime}
+              />
+            )}
+
+            {adminSection === "promotions" && (
+              <AdminPromotionManager
+                promotions={promotions}
+                onCreate={handleCreatePromo}
+                onDelete={handleDeletePromo}
               />
             )}
           </div>

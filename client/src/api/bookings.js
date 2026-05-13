@@ -23,7 +23,7 @@ const getAuthHeaders = (token) => ({
 
 /** Validate a promo code — returns { valid, discountPct } */
 export const validatePromo = async (code, token) => {
-  const res = await fetch(`${API_BASE}/validate-promo?code=${encodeURIComponent(code)}`, {
+  const res = await fetch(`http://localhost:5000/api/promotions/validate?code=${encodeURIComponent(code)}`, {
     headers: getAuthHeaders(token)
   });
   return handleResponse(res);

@@ -7,9 +7,14 @@ const today = () => new Date().toISOString().slice(0, 10);
 export default function ShowtimeSelector({ onBook, initialMovieId = "" }) {
   const [movies, setMovies] = useState([]);
   const [showtimes, setShowtimes] = useState([]);
-  const [filters, setFilters] = useState({ movieId: initialMovieId, date: today() });
+  const [filters, setFilters] = useState({ movieId: initialMovieId, date: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // Sync initialMovieId from parent when it changes
+  useEffect(() => {
+    setFilters(p => ({ ...p, movieId: initialMovieId }));
+  }, [initialMovieId]);
 
   // Load active movies once for the movie filter dropdown
   useEffect(() => {
@@ -47,7 +52,11 @@ export default function ShowtimeSelector({ onBook, initialMovieId = "" }) {
 
   return (
     <section className="showtime-selector">
-      <h2>Now Showing &amp; Upcoming</h2>
+      <h2>
+        {filters.movieId 
+          ? `Showtimes for ${movies.find(m => m._id === filters.movieId)?.title || "Selected Movie"}` 
+          : "Now Showing & Upcoming"}
+      </h2>
 
       {/* Filters */}
       <div className="showtime-filters">

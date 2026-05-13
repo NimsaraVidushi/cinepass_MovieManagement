@@ -154,3 +154,19 @@ export const activateMovie = async (req, res, next) => {
     next(error);
   }
 };
+
+export const deleteMovie = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const movie = await Movie.findByIdAndDelete(id);
+
+    if (!movie) {
+      res.status(404).json({ message: "Movie not found" });
+      return;
+    }
+
+    res.json({ message: "Movie permanently deleted" });
+  } catch (error) {
+    next(error);
+  }
+};

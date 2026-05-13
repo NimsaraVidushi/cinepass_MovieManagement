@@ -6,6 +6,7 @@ import hallRoutes from "./routes/hallRoutes.js";
 import showtimeRoutes from "./routes/showtimeRoutes.js";
 import bookingRoutes from "./routes/bookingRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
+import promotionRoutes from "./routes/promotionRoutes.js";
 import { connectDb } from "./config/db.js";
 
 const app = express();
@@ -24,6 +25,7 @@ app.use("/api/movies", movieRoutes);
 app.use("/api/halls", hallRoutes);
 app.use("/api/showtimes", showtimeRoutes);
 app.use("/api/bookings", bookingRoutes);
+app.use("/api/promotions", promotionRoutes);
 
 app.use((error, _req, res, _next) => {
   // eslint-disable-next-line no-console

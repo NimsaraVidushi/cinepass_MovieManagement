@@ -1,17 +1,23 @@
 import { useState } from "react";
 
-export default function AdminMovieEdit({ movie, onUpdate, onCancel, onDeactivate, onActivate }) {
+export default function AdminMovieEdit({ movie, onUpdate, onCancel, onDeactivate, onActivate, onDelete }) {
   const [formData, setFormData] = useState({
     title: movie.title,
     genre: movie.genre,
     language: movie.language,
-    ageRating: movie.ageRating,
     duration: movie.duration,
     releaseDate: new Date(movie.releaseDate).toISOString().slice(0, 10),
     posterUrl: movie.posterUrl || "",
     description: movie.description || "",
+    ageRating: movie.ageRating || "PG-13",
     isActive: movie.isActive
   });
+
+  const handleDelete = () => {
+    if (window.confirm(`Are you absolutely sure you want to PERMANENTLY delete "${movie.title}"? This cannot be undone.`)) {
+      onDelete(movie._id);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -32,9 +38,23 @@ export default function AdminMovieEdit({ movie, onUpdate, onCancel, onDeactivate
           <img 
             src={formData.posterUrl || "https://via.placeholder.com/300x450?text=No+Poster"} 
             alt="Preview" 
-            style={{ width: "100%", borderRadius: "8px", boxShadow: "0 10px 30px rgba(0,0,0,0.5)" }}
+            style={{ 
+              width: "100%", 
+              aspectRatio: "2/3", 
+              objectFit: "cover", 
+              borderRadius: "8px", 
+              boxShadow: "0 10px 30px rgba(0,0,0,0.5)" 
+            }}
           />
           <div className="admin-actions" style={{ marginTop: "1.5rem", display: "grid", gap: "0.5rem" }}>
+            <button
+              className="active"
+              style={{ width: "100%", background: "#1db954" }}
+              onClick={() => onActivate(movie._id)}
+              disabled={movie.isActive}
+            >
+              Activate Movie
+            </button>
             <button
               className="danger"
               style={{ width: "100%" }}
@@ -44,12 +64,11 @@ export default function AdminMovieEdit({ movie, onUpdate, onCancel, onDeactivate
               Deactivate Movie
             </button>
             <button
-              className="active"
-              style={{ width: "100%", background: "#1db954" }}
-              onClick={() => onActivate(movie._id)}
-              disabled={movie.isActive}
+              className="secondary"
+              style={{ width: "100%", color: "#ff4d4d", borderColor: "#333", marginTop: "1rem" }}
+              onClick={handleDelete}
             >
-              Activate Movie
+              🗑 Delete Permanently
             </button>
           </div>
         </div>
@@ -85,22 +104,22 @@ export default function AdminMovieEdit({ movie, onUpdate, onCancel, onDeactivate
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
-            <div>
+            <div className="form-group">
+              <label className="field-label">Duration (min)</label>
+              <input 
+                type="number" 
+                name="duration" 
+                value={formData.duration} 
+                onChange={(e) => setFormData({...formData, duration: e.target.value})}
+                required 
+              />
+            </div>
+            <div className="form-group">
               <label className="field-label">Age Rating</label>
               <input 
                 name="ageRating" 
                 value={formData.ageRating} 
                 onChange={(e) => setFormData({...formData, ageRating: e.target.value})}
-                required 
-              />
-            </div>
-            <div>
-              <label className="field-label">Duration (min)</label>
-              <input 
-                name="duration" 
-                type="number"
-                value={formData.duration} 
-                onChange={(e) => setFormData({...formData, duration: e.target.value})}
                 required 
               />
             </div>

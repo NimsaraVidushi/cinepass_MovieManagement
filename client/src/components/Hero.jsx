@@ -18,7 +18,6 @@ export default function Hero({ movie, onSelect, onBook }) {
         <div className="hero-meta">
           <span className="match">98% Match</span>
           <span>{new Date(movie.releaseDate).getFullYear()}</span>
-          <span className="rating">{movie.ageRating}</span>
           <span>{movie.duration}m</span>
         </div>
         <p className="hero-description">

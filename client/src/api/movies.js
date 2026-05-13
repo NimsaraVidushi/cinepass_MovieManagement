@@ -82,3 +82,16 @@ export const activateMovie = async (id, token) => {
   }
   return response.json();
 };
+
+export const deleteMovie = async (id, token) => {
+  const response = await fetch(`${API_BASE}/${id}`, { 
+    method: "DELETE",
+    headers: {
+      "Authorization": `Bearer ${token}`
+    }
+  });
+  if (!response.ok) {
+    throw new Error("Failed to delete movie permanently");
+  }
+  return response.json();
+};

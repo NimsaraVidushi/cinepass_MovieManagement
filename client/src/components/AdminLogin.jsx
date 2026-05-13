@@ -25,52 +25,57 @@ export default function AdminLogin({ onLoginSuccess, onCancel }) {
   };
 
   return (
-    <div className="admin-login-overlay">
-      <div className="admin-login-card">
-        <div className="admin-login-header">
-          <div className="admin-logo">CP</div>
-          <h2>ADMIN PORTAL</h2>
-          <p>Secure authentication required</p>
-        </div>
+    <div className="auth-page-wrapper">
+      <div className="auth-background">
+        <img 
+          src="https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&q=80&w=2070" 
+          alt="Admin background" 
+          style={{ filter: "brightness(0.3) grayscale(0.5)" }}
+        />
+      </div>
 
-        <form className="admin-login-form" onSubmit={handleSubmit}>
-          {error && <div className="admin-error-message">{error}</div>}
-          
-          <div className="admin-form-group">
-            <label htmlFor="admin-email">EMAIL ADDRESS</label>
+      <div className="auth-card" style={{ border: "1px solid rgba(229, 9, 20, 0.2)" }}>
+        <div style={{ textAlign: "center", marginBottom: "2rem" }}>
+          <div className="admin-logo" style={{ margin: "0 auto 1.5rem" }}>CP</div>
+          <h2 style={{ fontSize: "1.8rem", margin: 0 }}>ADMIN PORTAL</h2>
+          <p style={{ color: "var(--netflix-light-gray)", fontSize: "0.9rem", marginTop: "0.5rem" }}>Authentication Required</p>
+        </div>
+        
+        {error && <div className="auth-error">{error}</div>}
+        
+        <form onSubmit={handleSubmit}>
+          <div className="auth-form-group">
+            <label className="field-label" style={{ fontSize: "0.75rem", letterSpacing: "1px" }}>ADMIN EMAIL</label>
             <input
               type="email"
-              id="admin-email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
               placeholder="admin@cinepass.com"
+              autoFocus
             />
           </div>
-
-          <div className="admin-form-group">
-            <label htmlFor="admin-password">PASSWORD</label>
+          
+          <div className="auth-form-group">
+            <label className="field-label" style={{ fontSize: "0.75rem", letterSpacing: "1px" }}>PASSWORD</label>
             <input
               type="password"
-              id="admin-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
               placeholder="••••••••"
             />
           </div>
-
-          <button type="submit" className="admin-submit-btn" disabled={loading}>
-            {loading ? "AUTHENTICATING..." : "LOGIN TO DASHBOARD"}
-          </button>
           
-          <button type="button" className="admin-cancel-btn" onClick={onCancel}>
-            Return to User Login
+          <button type="submit" className="auth-submit-btn" disabled={loading} style={{ background: "#333", border: "1px solid #555" }}>
+            {loading ? "AUTHENTICATING..." : "AUTHORIZE ACCESS"}
           </button>
         </form>
 
-        <div className="admin-login-footer">
-          <p>© 2024 CinePass Management System v2.0.4</p>
+        <div className="auth-footer" style={{ textAlign: "center" }}>
+          <button type="button" onClick={onCancel} style={{ color: "var(--netflix-red)", fontWeight: "700" }}>
+            Return to User Login
+          </button>
         </div>
       </div>
     </div>
