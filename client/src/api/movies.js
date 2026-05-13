@@ -29,9 +29,12 @@ export const fetchMovieById = async (id, includeInactive = false) => {
   return response.json();
 };
 
-export const createMovie = async (formData) => {
+export const createMovie = async (formData, token) => {
   const response = await fetch(API_BASE, {
     method: "POST",
+    headers: {
+      "Authorization": `Bearer ${token}`
+    },
     body: formData
   });
   if (!response.ok) {
@@ -40,9 +43,12 @@ export const createMovie = async (formData) => {
   return response.json();
 };
 
-export const updateMovie = async (id, formData) => {
+export const updateMovie = async (id, formData, token) => {
   const response = await fetch(`${API_BASE}/${id}`, {
     method: "PUT",
+    headers: {
+      "Authorization": `Bearer ${token}`
+    },
     body: formData
   });
   if (!response.ok) {
@@ -51,16 +57,26 @@ export const updateMovie = async (id, formData) => {
   return response.json();
 };
 
-export const deactivateMovie = async (id) => {
-  const response = await fetch(`${API_BASE}/${id}/deactivate`, { method: "PATCH" });
+export const deactivateMovie = async (id, token) => {
+  const response = await fetch(`${API_BASE}/${id}/deactivate`, { 
+    method: "PATCH",
+    headers: {
+      "Authorization": `Bearer ${token}`
+    }
+  });
   if (!response.ok) {
     throw new Error("Failed to deactivate movie");
   }
   return response.json();
 };
 
-export const activateMovie = async (id) => {
-  const response = await fetch(`${API_BASE}/${id}/activate`, { method: "PATCH" });
+export const activateMovie = async (id, token) => {
+  const response = await fetch(`${API_BASE}/${id}/activate`, { 
+    method: "PATCH",
+    headers: {
+      "Authorization": `Bearer ${token}`
+    }
+  });
   if (!response.ok) {
     throw new Error("Failed to activate movie");
   }

@@ -6,13 +6,16 @@ import {
   getShowtimes,
   updateShowtime
 } from "../controllers/showtimeController.js";
+import { protect, admin } from "../middleware/authMiddleware.js";
 
 const router = Router();
 
 router.get("/", getShowtimes);
 router.get("/:id", getShowtimeById);
-router.post("/", createShowtime);
-router.put("/:id", updateShowtime);
-router.delete("/:id", cancelShowtime);
+
+// Admin only routes
+router.post("/", protect, admin, createShowtime);
+router.put("/:id", protect, admin, updateShowtime);
+router.delete("/:id", protect, admin, cancelShowtime);
 
 export default router;

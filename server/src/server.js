@@ -5,6 +5,7 @@ import movieRoutes from "./routes/movieRoutes.js";
 import hallRoutes from "./routes/hallRoutes.js";
 import showtimeRoutes from "./routes/showtimeRoutes.js";
 import bookingRoutes from "./routes/bookingRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
 import { connectDb } from "./config/db.js";
 
 const app = express();
@@ -18,6 +19,7 @@ app.get("/health", (_req, res) => {
   res.json({ status: "ok" });
 });
 
+app.use("/api/auth", authRoutes);
 app.use("/api/movies", movieRoutes);
 app.use("/api/halls", hallRoutes);
 app.use("/api/showtimes", showtimeRoutes);

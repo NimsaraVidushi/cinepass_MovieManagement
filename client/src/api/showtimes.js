@@ -23,10 +23,13 @@ export const fetchShowtimeById = async (id) => {
   return response.json();
 };
 
-export const createShowtime = async (data) => {
+export const createShowtime = async (data, token) => {
   const response = await fetch(API_BASE, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { 
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
     body: JSON.stringify(data)
   });
   if (!response.ok) {
@@ -36,10 +39,13 @@ export const createShowtime = async (data) => {
   return response.json();
 };
 
-export const updateShowtime = async (id, data) => {
+export const updateShowtime = async (id, data, token) => {
   const response = await fetch(`${API_BASE}/${id}`, {
     method: "PUT",
-    headers: { "Content-Type": "application/json" },
+    headers: { 
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    },
     body: JSON.stringify(data)
   });
   if (!response.ok) {
@@ -49,8 +55,13 @@ export const updateShowtime = async (id, data) => {
   return response.json();
 };
 
-export const cancelShowtime = async (id) => {
-  const response = await fetch(`${API_BASE}/${id}`, { method: "DELETE" });
+export const cancelShowtime = async (id, token) => {
+  const response = await fetch(`${API_BASE}/${id}`, { 
+    method: "DELETE",
+    headers: {
+      "Authorization": `Bearer ${token}`
+    }
+  });
   if (!response.ok) {
     const err = await response.json().catch(() => ({}));
     throw new Error(err.message || "Failed to cancel showtime");

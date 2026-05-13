@@ -8,32 +8,33 @@ import {
   getBookingsByEmail
 } from "../controllers/bookingController.js";
 import { validatePromoCode } from "../services/paymentGateway.js";
+import { protect, admin } from "../middleware/authMiddleware.js";
 
 const router = Router();
 
 // Promo code validation (lightweight, no DB hit)
-router.get("/validate-promo", (req, res) => {
+router.get("/validate-promo", protect, (req, res) => {
   const { code } = req.query;
   const result = validatePromoCode(code);
   res.json(result);
 });
 
 // Admin — list all
-router.get("/admin/all", getAllBookings);
+router.get("/admin/all", protect, admin, getAllBookings);
 
-// User — history by email
-router.get("/", getBookingsByEmail);
+// User — history (automatically uses logged-in user)
+router.get("/my", protect, getBookingsByEmail);
 
 // Single booking + payment
-router.get("/:id", getBookingById);
+router.get("/:id", protect, getBookingById);
 
 // Create booking (lock seats)
-router.post("/", createBooking);
+router.post("/", protect, createBooking);
 
 // Checkout (process payment)
-router.post("/:id/checkout", checkout);
+router.post("/:id/checkout", protect, checkout);
 
 // Cancel + refund
-router.delete("/:id", cancelBooking);
+router.delete("/:id", protect, cancelBooking);
 
 export default router;

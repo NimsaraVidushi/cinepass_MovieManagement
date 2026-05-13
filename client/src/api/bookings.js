@@ -16,27 +16,34 @@ const handleResponse = async (res) => {
   return res.json();
 };
 
+const getAuthHeaders = (token) => ({
+  "Content-Type": "application/json",
+  ...(token ? { "Authorization": `Bearer ${token}` } : {})
+});
+
 /** Validate a promo code — returns { valid, discountPct } */
-export const validatePromo = async (code) => {
-  const res = await fetch(`${API_BASE}/validate-promo?code=${encodeURIComponent(code)}`);
+export const validatePromo = async (code, token) => {
+  const res = await fetch(`${API_BASE}/validate-promo?code=${encodeURIComponent(code)}`, {
+    headers: getAuthHeaders(token)
+  });
   return handleResponse(res);
 };
 
 /** Create booking (lock seats) — returns pending Booking */
-export const createBooking = async (data) => {
+export const createBooking = async (data, token) => {
   const res = await fetch(API_BASE, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: getAuthHeaders(token),
     body: JSON.stringify(data)
   });
   return handleResponse(res);
 };
 
 /** Checkout a pending booking — returns { booking, payment } or throws on decline */
-export const checkoutBooking = async (bookingId, paymentData) => {
+export const checkoutBooking = async (bookingId, paymentData, token) => {
   const res = await fetch(`${API_BASE}/${bookingId}/checkout`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: getAuthHeaders(token),
     body: JSON.stringify(paymentData)
   });
   // 402 = payment failed — still parse body for details
@@ -50,28 +57,37 @@ export const checkoutBooking = async (bookingId, paymentData) => {
   return handleResponse(res);
 };
 
-/** Get booking history for an email */
-export const fetchBookingsByEmail = async (email, status = "") => {
-  const q = toQuery({ email, status });
-  const res = await fetch(`${API_BASE}?${q}`);
+/** Get booking history for current user */
+export const fetchMyBookings = async (token, status = "") => {
+  const q = toQuery({ status });
+  const res = await fetch(`${API_BASE}/my?${q}`, {
+    headers: getAuthHeaders(token)
+  });
   return handleResponse(res);
 };
 
 /** Get a single booking + its payment */
-export const fetchBookingById = async (id) => {
-  const res = await fetch(`${API_BASE}/${id}`);
+export const fetchBookingById = async (id, token) => {
+  const res = await fetch(`${API_BASE}/${id}`, {
+    headers: getAuthHeaders(token)
+  });
   return handleResponse(res);
 };
 
 /** Admin — fetch all bookings */
-export const fetchAllBookings = async (params = {}) => {
+export const fetchAllBookings = async (params = {}, token) => {
   const q = toQuery(params);
-  const res = await fetch(`${API_BASE}/admin/all?${q}`);
+  const res = await fetch(`${API_BASE}/admin/all?${q}`, {
+    headers: getAuthHeaders(token)
+  });
   return handleResponse(res);
 };
 
 /** Cancel a booking (+ refund if confirmed) */
-export const cancelBooking = async (id) => {
-  const res = await fetch(`${API_BASE}/${id}`, { method: "DELETE" });
+export const cancelBooking = async (id, token) => {
+  const res = await fetch(`${API_BASE}/${id}`, { 
+    method: "DELETE",
+    headers: getAuthHeaders(token)
+  });
   return handleResponse(res);
 };

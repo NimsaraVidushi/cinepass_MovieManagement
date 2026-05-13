@@ -8,14 +8,17 @@ import {
   updateMovie
 } from "../controllers/movieController.js";
 import { uploadPoster } from "../middleware/upload.js";
+import { protect, admin } from "../middleware/authMiddleware.js";
 
 const router = Router();
 
 router.get("/", getMovies);
 router.get("/:id", getMovieById);
-router.post("/", uploadPoster.single("poster"), createMovie);
-router.put("/:id", uploadPoster.single("poster"), updateMovie);
-router.patch("/:id/deactivate", deactivateMovie);
-router.patch("/:id/activate", activateMovie);
+
+// Admin only routes
+router.post("/", protect, admin, uploadPoster.single("poster"), createMovie);
+router.put("/:id", protect, admin, uploadPoster.single("poster"), updateMovie);
+router.patch("/:id/deactivate", protect, admin, deactivateMovie);
+router.patch("/:id/activate", protect, admin, activateMovie);
 
 export default router;

@@ -1,22 +1,19 @@
 import { useState, useEffect } from "react";
-import { fetchBookingsByEmail } from "../api/bookings.js";
+import { fetchMyBookings } from "../api/bookings.js";
 
-export default function BookingHistory() {
-  const [email, setEmail] = useState("");
+export default function BookingHistory({ user }) {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSearch = async (e) => {
-    e.preventDefault();
-    if (!email) return;
+  const loadMyBookings = async () => {
     setLoading(true);
     setError("");
     try {
-      const data = await fetchBookingsByEmail(email);
+      const data = await fetchMyBookings(user.token);
       setBookings(data);
       if (data.length === 0) {
-        setError("No bookings found for this email.");
+        setError("You haven't made any bookings yet.");
       }
     } catch (err) {
       setError(err.message);
@@ -25,32 +22,21 @@ export default function BookingHistory() {
     }
   };
 
+  useEffect(() => {
+    if (user?.token) {
+      loadMyBookings();
+    }
+  }, [user]);
+
   return (
     <div className="booking-history admin">
       <div className="booking-header">
         <h2>My Bookings</h2>
-        <p className="field-label">View your past tickets and booking status</p>
+        <p className="field-label">View your past tickets and booking status for {user.email}</p>
       </div>
 
-      <form onSubmit={handleSearch} className="form" style={{ marginBottom: "2rem", maxWidth: "500px" }}>
-        <div className="form-group">
-          <label className="field-label">Enter your email</label>
-          <div style={{ display: "flex", gap: "0.5rem" }}>
-            <input 
-              type="email" 
-              placeholder="user@example.com" 
-              value={email} 
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-            <button type="submit" disabled={loading}>
-              {loading ? "Searching..." : "Find Bookings"}
-            </button>
-          </div>
-        </div>
-      </form>
-
-      {error && <p className="error-banner">{error}</p>}
+      {loading && <p>Loading your bookings...</p>}
+      {error && !loading && <p className="error-banner">{error}</p>}
 
       <div className="movie-grid">
         {bookings.map((b) => (

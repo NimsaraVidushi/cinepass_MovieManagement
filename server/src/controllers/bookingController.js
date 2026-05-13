@@ -26,7 +26,12 @@ export const createBooking = async (req, res, next) => {
   const session = await mongoose.startSession();
   session.startTransaction();
   try {
-    const { showtimeId, seatsBooked, userName, userEmail, promoCode = "" } = req.body;
+    const { showtimeId, seatsBooked, promoCode = "" } = req.body;
+    
+    // Use authenticated user info if available, otherwise fall back to body (for backward compatibility if needed, though routes are protected now)
+    const userName = req.user?.username || req.body.userName;
+    const userEmail = req.user?.email || req.body.userEmail;
+
     const seats = Number(seatsBooked);
 
     if (!seats || seats < 1 || seats > 10) {
@@ -201,8 +206,10 @@ export const checkout = async (req, res, next) => {
  */
 export const getBookingsByEmail = async (req, res, next) => {
   try {
-    const { email, status } = req.query;
-    if (!email) return res.status(400).json({ message: "email query param is required." });
+    const { status } = req.query;
+    
+    // Always use the authenticated user's email
+    const email = req.user.email;
 
     const query = { "user.email": email.toLowerCase() };
     if (status) query.status = status;
@@ -238,6 +245,11 @@ export const getBookingById = async (req, res, next) => {
     });
 
     if (!booking) return res.status(404).json({ message: "Booking not found." });
+
+    // Ownership check: user can only see their own bookings unless admin
+    if (req.user.role !== "admin" && booking.user.email !== req.user.email) {
+      return res.status(403).json({ message: "Forbidden: You cannot access this booking." });
+    }
 
     const payment = await Payment.findOne({ booking: booking._id }).sort({ createdAt: -1 });
 
@@ -294,6 +306,12 @@ export const cancelBooking = async (req, res, next) => {
     if (!booking) {
       await session.abortTransaction();
       return res.status(404).json({ message: "Booking not found." });
+    }
+
+    // Ownership check: user can only cancel their own bookings unless admin
+    if (req.user.role !== "admin" && booking.user.email !== req.user.email) {
+      await session.abortTransaction();
+      return res.status(403).json({ message: "Forbidden: You cannot cancel this booking." });
     }
 
     if (!["pending", "confirmed"].includes(booking.status)) {
