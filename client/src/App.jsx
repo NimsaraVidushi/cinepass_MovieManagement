@@ -13,6 +13,8 @@ import BookingSuccess from "./components/BookingSuccess.jsx";
 import BookingHistory from "./components/BookingHistory.jsx";
 import Login from "./components/Login.jsx";
 import Register from "./components/Register.jsx";
+import AdminLogin from "./components/AdminLogin.jsx";
+import Hero from "./components/Hero.jsx";
 import {
   activateMovie,
   createMovie,
@@ -88,9 +90,17 @@ export default function App() {
 
   // ── Auth handlers ───────────────────────────────────────────────────────────
   const handleLoginSuccess = (userData) => {
+    if (userData.type === "switch-to-admin") {
+      setActiveTab("admin-login");
+      return;
+    }
     setUser(userData);
     localStorage.setItem("user", JSON.stringify(userData));
-    setActiveTab("catalog");
+    if (userData.role === "admin") {
+      setActiveTab("admin");
+    } else {
+      setActiveTab("catalog");
+    }
   };
 
   const handleLogout = () => {
@@ -287,25 +297,13 @@ export default function App() {
 
       {/* ── Catalog Tab ───────────────────────────────────────────────────── */}
       {activeTab === "catalog" && (
-        <div className="catalog-container">
+        <div className="catalog-container fade-in">
           {!selectedMovie && heroMovie && (
-            <section className="hero">
-              <div className="hero-background">
-                <img src={heroMovie.posterUrl || "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&q=80&w=2070"} alt="Hero" />
-              </div>
-              <div className="hero-content">
-                <h2 className="hero-title">{heroMovie.title}</h2>
-                <p className="hero-description">{heroMovie.description || "Experience the magic of cinema. Book your tickets now for the latest blockbusters."}</p>
-                <div className="hero-btns">
-                  <button className="hero-btn play" onClick={() => handleSelectMovie(heroMovie._id)}>
-                    <span>▶</span> Play Info
-                  </button>
-                  <button className="hero-btn info" onClick={() => handleBookFromDetails(heroMovie)}>
-                    <span>ⓘ</span> Book Now
-                  </button>
-                </div>
-              </div>
-            </section>
+            <Hero 
+              movie={heroMovie} 
+              onSelect={handleSelectMovie} 
+              onBook={handleBookFromDetails} 
+            />
           )}
 
           <div className="filters-container">
@@ -326,7 +324,8 @@ export default function App() {
             </section>
           </div>
 
-          <div className="inner-container">
+          <div className="inner-container animate-in" style={{ marginTop: "2rem" }}>
+            <h2 className="section-title">Now Showing</h2>
             {selectedMovie
               ? <MovieDetails movie={selectedMovie} onClose={() => setSelectedMovie(null)} onBook={handleBookFromDetails} />
               : <MovieList movies={movies} onSelectMovie={handleSelectMovie} loading={loading} />
@@ -366,6 +365,14 @@ export default function App() {
           <Register 
             onRegisterSuccess={handleLoginSuccess} 
             onSwitchToLogin={() => setActiveTab("login")} 
+          />
+        </div>
+      )}
+      {activeTab === "admin-login" && (
+        <div className="inner-container">
+          <AdminLogin 
+            onLoginSuccess={handleLoginSuccess} 
+            onCancel={() => setActiveTab("login")} 
           />
         </div>
       )}

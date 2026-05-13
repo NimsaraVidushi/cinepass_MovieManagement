@@ -57,6 +57,11 @@ export default function Login({ onLoginSuccess, onSwitchToRegister }) {
             Register here
           </button>
         </p>
+        <div className="admin-access-link">
+          <button type="button" className="link-button admin-link" onClick={() => onLoginSuccess({ type: "switch-to-admin" })}>
+            Access Admin Portal
+          </button>
+        </div>
       </form>
     </div>
   );

@@ -5,6 +5,8 @@ export default function Register({ onRegisterSuccess, onSwitchToLogin }) {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminSecret, setAdminSecret] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -13,7 +15,13 @@ export default function Register({ onRegisterSuccess, onSwitchToLogin }) {
     setError("");
     setLoading(true);
     try {
-      const userData = await register(username, email, password);
+      const userData = await register({
+        username,
+        email,
+        password,
+        role: isAdmin ? "admin" : "user",
+        adminSecret: isAdmin ? adminSecret : undefined
+      });
       onRegisterSuccess(userData);
     } catch (err) {
       setError(err.message);
@@ -60,6 +68,31 @@ export default function Register({ onRegisterSuccess, onSwitchToLogin }) {
             placeholder="Choose a password"
           />
         </div>
+
+        <div className="form-group checkbox-group">
+          <label>
+            <input 
+              type="checkbox" 
+              checked={isAdmin} 
+              onChange={(e) => setIsAdmin(e.target.checked)} 
+            />
+            Register as Administrator
+          </label>
+        </div>
+
+        {isAdmin && (
+          <div className="form-group">
+            <label htmlFor="adminSecret">Admin Secret Key</label>
+            <input
+              type="password"
+              id="adminSecret"
+              value={adminSecret}
+              onChange={(e) => setAdminSecret(e.target.value)}
+              required
+              placeholder="Enter secret key"
+            />
+          </div>
+        )}
         <button type="submit" className="primary" disabled={loading}>
           {loading ? "Registering..." : "Register"}
         </button>

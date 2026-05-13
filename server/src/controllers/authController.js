@@ -11,18 +11,28 @@ const generateToken = (user) => {
 
 export const register = async (req, res) => {
   try {
-    const { username, email, password, role } = req.body;
+    const { username, email, password, role, adminSecret } = req.body;
 
     const userExists = await User.findOne({ $or: [{ email }, { username }] });
     if (userExists) {
       return res.status(400).json({ message: "User already exists" });
     }
 
+    // Check if registering as admin
+    let finalRole = "user";
+    if (role === "admin") {
+      const secretKey = process.env.ADMIN_SECRET_KEY || "cinepass_admin_2024";
+      if (adminSecret !== secretKey) {
+        return res.status(403).json({ message: "Invalid admin secret key" });
+      }
+      finalRole = "admin";
+    }
+
     const user = await User.create({
       username,
       email,
       password,
-      role: role || "user"
+      role: finalRole
     });
 
     res.status(201).json({
@@ -42,15 +52,22 @@ export const login = async (req, res) => {
     const { email, password } = req.body;
 
     const user = await User.findOne({ email });
-    if (user && (await user.comparePassword(password))) {
-      res.json({
-        _id: user._id,
-        username: user.username,
-        email: user.email,
-        role: user.role,
-        token: generateToken(user)
-      });
+    if (user) {
+      const isMatch = await user.comparePassword(password);
+      if (isMatch) {
+        res.json({
+          _id: user._id,
+          username: user.username,
+          email: user.email,
+          role: user.role,
+          token: generateToken(user)
+        });
+      } else {
+        console.log(`Login failed: Password mismatch for ${email}`);
+        res.status(401).json({ message: "Invalid email or password" });
+      }
     } else {
+      console.log(`Login failed: User not found for ${email}`);
       res.status(401).json({ message: "Invalid email or password" });
     }
   } catch (error) {

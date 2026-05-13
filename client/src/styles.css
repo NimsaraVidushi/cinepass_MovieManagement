@@ -1,12 +1,18 @@
-/* ─── Netflix Inspired Theme ─── */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&display=swap');
+
+/* ─── Premium Cinepass Theme ─── */
 :root {
   --netflix-red: #e50914;
-  --netflix-black: #000000;
+  --netflix-black: #050505;
   --netflix-dark-gray: #141414;
   --netflix-light-gray: #b3b3b3;
   --netflix-white: #ffffff;
-  --netflix-font: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  --glass-bg: rgba(255, 255, 255, 0.05);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-blur: blur(12px);
+  --netflix-font: 'Outfit', 'Inter', -apple-system, sans-serif;
+  --transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  --shadow-lg: 0 20px 40px rgba(0, 0, 0, 0.4);
 }
 
 * {
@@ -18,8 +24,9 @@ body {
   font-family: var(--netflix-font);
   background: var(--netflix-black);
   color: var(--netflix-white);
-  line-height: 1.5;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
 .container {
@@ -35,7 +42,24 @@ body {
 
 .inner-container {
   width: min(1400px, 94%);
-  margin: 2rem auto;
+.section-title {
+  font-size: 1.8rem;
+  font-weight: 800;
+  margin-bottom: 2rem;
+  letter-spacing: -0.5px;
+  position: relative;
+  display: inline-block;
+}
+
+.section-title::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -5px;
+  width: 40px;
+  height: 4px;
+  background: var(--netflix-red);
+  border-radius: 2px;
 }
 
 /* ─── Header & Tabs ──────────────────────────────────────────────────── */
@@ -48,27 +72,30 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 4%;
-  transition: background 0.4s ease;
-  background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 100%);
+  padding: 1.2rem 6%;
+  transition: var(--transition);
+  background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, transparent 100%);
 }
 
 header.scrolled {
-  background: var(--netflix-black);
+  background: rgba(5, 5, 5, 0.85);
+  backdrop-filter: blur(20px);
+  padding: 0.8rem 6%;
+  border-bottom: 1px solid var(--glass-border);
 }
 
 h1.logo {
   color: var(--netflix-red);
-  font-size: 2.2rem;
-  font-weight: 800;
-  letter-spacing: -1.5px;
+  font-size: 2.5rem;
+  font-weight: 900;
+  letter-spacing: -2px;
   text-transform: uppercase;
   margin: 0;
   cursor: pointer;
-  background: linear-gradient(to bottom, #e50914 0%, #b20710 100%);
+  background: linear-gradient(135deg, #e50914 0%, #ff1f1f 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 0 2px rgba(0,0,0,0.5));
+  filter: drop-shadow(0 0 10px rgba(229, 9, 20, 0.3));
 }
 
 .tabs {
@@ -257,12 +284,54 @@ button.active {
 }
 
 .hero-btn.info {
-  background: rgba(109, 109, 110, 0.7);
+  background: rgba(109, 109, 110, 0.4);
   color: var(--netflix-white);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .hero-btn.info:hover {
-  background: rgba(109, 109, 110, 0.4);
+  background: rgba(109, 109, 110, 0.6);
+}
+
+.hero-badge {
+  display: inline-block;
+  padding: 0.3rem 0.8rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 2px;
+  margin-bottom: 1.5rem;
+  border-radius: 4px;
+  color: var(--netflix-red);
+}
+
+.hero-meta {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.hero-meta .match {
+  color: #46d369;
+}
+
+.hero-meta .rating {
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  padding: 0 0.5rem;
+  font-size: 0.9rem;
+  border-radius: 2px;
+}
+
+.hero-vignette {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 20vh;
+  background: linear-gradient(to top, var(--netflix-black) 0%, transparent 100%);
+  z-index: 5;
 }
 
 /* ─── Catalog Filters ────────────────────────────────────────────────── */
@@ -305,17 +374,22 @@ button.active {
   cursor: pointer;
 }
 
-.card:hover {
-  transform: scale(1.15);
-  z-index: 100;
-}
-
 .poster {
   width: 100%;
   aspect-ratio: 2/3;
   object-fit: cover;
-  border-radius: 4px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  border-radius: 8px;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+  transition: var(--transition);
+}
+
+.card:hover {
+  transform: scale(1.08) translateY(-10px);
+  z-index: 100;
+}
+
+.card:hover .poster {
+  box-shadow: 0 20px 40px rgba(229, 9, 20, 0.3);
 }
 
 .card-info {
@@ -323,31 +397,37 @@ button.active {
   bottom: 0;
   left: 0;
   right: 0;
-  background: linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 100%);
-  padding: 2rem 1rem 1rem;
+  background: linear-gradient(to top, rgba(5,5,5,1) 0%, rgba(5,5,5,0.8) 40%, transparent 100%);
+  padding: 3rem 1rem 1.2rem;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transform: translateY(20px);
+  transition: all 0.4s ease;
   pointer-events: none;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
 }
 
 .card:hover .card-info {
   opacity: 1;
+  transform: translateY(0);
 }
 
 .card-title {
-  font-size: 1rem;
-  font-weight: 700;
+  font-size: 1.1rem;
+  font-weight: 800;
   margin: 0;
+  color: #fff;
 }
 
 .placeholder {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #222;
+  background: #111;
   font-size: 0.9rem;
-  color: #666;
+  color: #444;
   aspect-ratio: 2/3;
+  border-radius: 8px;
 }
 
 .details {
@@ -453,6 +533,51 @@ button.active {
 }
 
 /* ─── Booking Flow Pages ─────────────────────────────────────────────── */
+.stepper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-weight: 700;
+  color: var(--netflix-light-gray);
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.step span {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 2px solid var(--netflix-light-gray);
+  font-size: 0.8rem;
+}
+
+.step.active {
+  color: var(--netflix-red);
+}
+
+.step.active span {
+  border-color: var(--netflix-red);
+  background: var(--netflix-red);
+  color: white;
+}
+
+.step-line {
+  width: 40px;
+  height: 2px;
+  background: #333;
+}
+
 .booking-page, .checkout-page, .payment-page {
   max-width: 800px;
   margin: 0 auto;
@@ -690,3 +815,226 @@ button.active {
   background: rgba(255,255,255,0.05);
   border-color: #666;
 }
+
+/* ── Admin Login Styles ─────────────────────────────────────────────────── */
+.admin-login-overlay {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+  padding: 2rem;
+}
+
+.admin-login-card {
+  background: rgba(20, 20, 20, 0.85);
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 450px;
+  padding: 3rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  position: relative;
+  overflow: hidden;
+}
+
+.admin-login-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #e50914, #ff0000, #b20710);
+  box-shadow: 0 0 20px rgba(229, 9, 20, 0.5);
+}
+
+.admin-login-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+}
+
+.admin-logo {
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: #e50914;
+  letter-spacing: -2px;
+  margin-bottom: 1rem;
+  text-shadow: 0 0 15px rgba(229, 9, 20, 0.3);
+}
+
+.admin-login-header h2 {
+  font-size: 1.5rem;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin: 0.5rem 0;
+  color: #fff;
+  font-weight: 700;
+}
+
+.admin-login-header p {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.admin-form-group {
+  margin-bottom: 1.5rem;
+}
+
+.admin-form-group label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 0.5rem;
+  letter-spacing: 1px;
+}
+
+.admin-form-group input {
+  width: 100%;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  color: #fff;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.admin-form-group input:focus {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #e50914;
+  outline: none;
+  box-shadow: 0 0 10px rgba(229, 9, 20, 0.2);
+}
+
+.admin-submit-btn {
+  width: 100%;
+  padding: 1.25rem;
+  background: #e50914;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 1rem;
+}
+
+.admin-submit-btn:hover {
+  background: #f40612;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(229, 9, 20, 0.4);
+}
+
+.admin-submit-btn:disabled {
+  background: #555;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.admin-cancel-btn {
+  width: 100%;
+  margin-top: 1rem;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 0.75rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.admin-cancel-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.admin-error-message {
+  background: rgba(229, 9, 20, 0.1);
+  border: 1px solid #e50914;
+  color: #fff;
+  padding: 0.75rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.admin-login-footer {
+  margin-top: 2rem;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 0.7rem;
+  letter-spacing: 0.5px;
+}
+
+.admin-access-link {
+  margin-top: 2rem;
+  text-align: center;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.admin-link {
+  font-size: 0.85rem;
+  font-weight: 600;
+  opacity: 0.6;
+}
+
+.admin-link:hover {
+  opacity: 1;
+  color: #e50914 !important;
+}
+
+}
+
+/* ── Premium Utilities ────────────────────────────────────────────────── */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+}
+
+.animate-in {
+  animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.fade-in {
+  animation: fadeIn 1s ease forwards;
+}
+
+/* ── Custom Scrollbar ────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--netflix-black);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--netflix-red);
+}
+
