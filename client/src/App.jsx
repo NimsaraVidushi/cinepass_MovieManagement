@@ -4,6 +4,7 @@ import AdminMovieEdit from "./components/AdminMovieEdit.jsx";
 import AdminHallManager from "./components/AdminHallManager.jsx";
 import AdminShowtimeManager from "./components/AdminShowtimeManager.jsx";
 import AdminPromotionManager from "./components/AdminPromotionManager.jsx";
+import AdminReviewManager from "./components/AdminReviewManager.jsx";
 import ShowtimeSelector from "./components/ShowtimeSelector.jsx";
 import { 
   fetchPromotions, 
@@ -22,6 +23,7 @@ import Login from "./components/Login.jsx";
 import Register from "./components/Register.jsx";
 import AdminLogin from "./components/AdminLogin.jsx";
 import Hero from "./components/Hero.jsx";
+import Watchlist from "./components/Watchlist.jsx";
 import {
   activateMovie,
   createMovie,
@@ -268,7 +270,8 @@ export default function App() {
           <nav className="tabs" style={{ marginLeft: "3rem" }}>
             <span className={activeTab === "catalog" ? "nav-link active" : "nav-link"} onClick={() => switchTab("catalog")}>Home</span>
             <span className={activeTab === "showtimes" ? "nav-link active" : "nav-link"} onClick={() => switchTab("showtimes")}>Showtimes</span>
-            {user && <span className={activeTab === "bookings" ? "nav-link active" : "nav-link"} onClick={() => switchTab("bookings")}>My List</span>}
+            {user && <span className={activeTab === "watchlist" ? "nav-link active" : "nav-link"} onClick={() => switchTab("watchlist")}>My List</span>}
+            {user && <span className={activeTab === "bookings" ? "nav-link active" : "nav-link"} onClick={() => switchTab("bookings")}>Bookings</span>}
             {user?.role === "admin" && <span className={activeTab === "admin" ? "nav-link active" : "nav-link"} onClick={() => switchTab("admin")}>Admin</span>}
           </nav>
         </div>
@@ -345,6 +348,7 @@ export default function App() {
                 movie={selectedMovie} 
                 onClose={() => setSelectedMovie(null)} 
                 onBook={handleBookFromDetails} 
+                user={user}
               />
             ) : (
               <>
@@ -429,6 +433,20 @@ export default function App() {
           ) : (
             <div style={{ textAlign: "center", padding: "5rem" }}>
               <h2 style={{ marginBottom: "2rem" }}>Please login to view your history</h2>
+              <button onClick={() => setActiveTab("login")}>Login Now</button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Watchlist Tab ─────────────────────────────────────────────────── */}
+      {activeTab === "watchlist" && (
+        <div className="inner-container">
+          {user ? (
+            <Watchlist user={user} onSelectMovie={handleSelectMovie} />
+          ) : (
+            <div style={{ textAlign: "center", padding: "5rem" }}>
+              <h2 style={{ marginBottom: "2rem" }}>Please login to view your watchlist</h2>
               <button onClick={() => setActiveTab("login")}>Login Now</button>
             </div>
           )}
@@ -528,6 +546,13 @@ export default function App() {
               >
                 Promotions
               </button>
+              <button
+                id="admin-tab-reviews"
+                className={adminSection === "reviews" ? "active" : "secondary"}
+                onClick={() => setAdminSection("reviews")}
+              >
+                Reviews
+              </button>
             </div>
 
             {adminSection === "movies" && !editingMovie && (
@@ -575,6 +600,10 @@ export default function App() {
                 onCreate={handleCreatePromo}
                 onDelete={handleDeletePromo}
               />
+            )}
+
+            {adminSection === "reviews" && (
+              <AdminReviewManager />
             )}
           </div>
         </div>
