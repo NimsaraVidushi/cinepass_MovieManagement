@@ -23,7 +23,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ["user", "admin"],
     default: "user"
-  }
+  },
+  watchlist: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Movie"
+  }]
 }, { timestamps: true });
 
 // Hash password before saving

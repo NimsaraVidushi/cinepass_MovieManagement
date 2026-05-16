@@ -1,4 +1,41 @@
-export default function MovieDetails({ movie, onClose, onBook }) {
+import { useState, useEffect } from "react";
+import ReviewSection from "./ReviewSection";
+import { fetchWatchlist, addToWatchlist, removeFromWatchlist } from "../api/users.js";
+
+export default function MovieDetails({ movie, onClose, onBook, user }) {
+  const [isInWatchlist, setIsInWatchlist] = useState(false);
+  const [loadingWatchlist, setLoadingWatchlist] = useState(false);
+
+  useEffect(() => {
+    if (user && user.token) {
+      fetchWatchlist(user.token).then(data => {
+        setIsInWatchlist(data.some(m => m._id === movie._id));
+      }).catch(err => console.error("Failed to fetch watchlist:", err));
+    }
+  }, [user, movie._id]);
+
+  const handleToggleWatchlist = async () => {
+    if (!user) {
+      alert("Please login to use the watchlist feature.");
+      return;
+    }
+    setLoadingWatchlist(true);
+    try {
+      if (isInWatchlist) {
+        await removeFromWatchlist(movie._id, user.token);
+        setIsInWatchlist(false);
+      } else {
+        await addToWatchlist(movie._id, user.token);
+        setIsInWatchlist(true);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to update watchlist");
+    } finally {
+      setLoadingWatchlist(false);
+    }
+  };
+
   if (!movie) return null;
 
   return (
@@ -123,14 +160,17 @@ export default function MovieDetails({ movie, onClose, onBook }) {
               <span>🎟</span> Book Tickets
             </button>
             <button 
-              className="secondary glass" 
+              className={`secondary ${isInWatchlist ? "active" : "glass"}`} 
               style={{ 
                 padding: "1.2rem 2.5rem", 
                 fontSize: "1.3rem",
-                borderRadius: "8px"
+                borderRadius: "8px",
+                opacity: loadingWatchlist ? 0.5 : 1
               }}
+              onClick={handleToggleWatchlist}
+              disabled={loadingWatchlist}
             >
-              + My List
+              {isInWatchlist ? "✓ In My List" : "+ My List"}
             </button>
           </div>
 
@@ -144,6 +184,8 @@ export default function MovieDetails({ movie, onClose, onBook }) {
               <p style={{ fontSize: "1.1rem", fontWeight: "600" }}>{movie.language}</p>
             </div>
           </div>
+          
+          <ReviewSection movieId={movie._id} />
         </div>
       </div>
     </section>
